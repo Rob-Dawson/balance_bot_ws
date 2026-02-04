@@ -8,9 +8,9 @@ The project features a ROS2 and Gazebo Harmonic balancing robot which is being c
 
 The following tools were used in this project:
 
-ROS2 - Jazzy
-Python
-Gazebo Harmonic
+- ROS2 - Jazzy
+- Python
+- Gazebo Harmonic
 
 ## Requirements
 
