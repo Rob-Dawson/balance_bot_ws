@@ -1,0 +1,17 @@
+controller_manager:
+  ros__parameters:
+    update_rate: 500
+
+    balance_bot_controller:
+      type: forward_command_controller/ForwardCommandController
+
+    joint_state_broadcaster:
+      type: joint_state_broadcaster/JointStateBroadcaster
+
+balance_bot_controller:
+  ros__parameters:
+    joints:
+      - left_wheel_joint
+      - right_wheel_joint
+
+    interface_name: effort
