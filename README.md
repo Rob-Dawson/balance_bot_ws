@@ -37,7 +37,7 @@ colcon build
 source install/setup.bash
 
 # Launch the robot
-# I will update this when a functioning launch file is present
+ros2 launch balance_bot_bringup gazebo.launch.py
 ```
 
 
