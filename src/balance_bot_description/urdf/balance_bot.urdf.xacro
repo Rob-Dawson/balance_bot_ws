@@ -2,6 +2,7 @@
 <robot xmlns:xacro="http://www.ros.org/wiki/xacro" name="mmtr">
 
     <xacro:include filename="inertial_macros.xacro" />
+    <xacro:include filename="$(find balance_bot_description)/urdf/balance_bot_control.urdf.xacro" />
     <xacro:property name="wheel_mass" value="0.2" />
     <xacro:property name="chassis_mass" value="0.5" />
     <xacro:property name="wheel_length" value="0.01" />
@@ -107,7 +108,7 @@
         <parent link="base_link" />
         <child link="left_wheel_link" />
         <axis xyz="0.0 0.0 1" />
-        <limit lower="0.0" upper="0.0" effort="0.0" velocity="0.0" />
+        <limit effort="5.0" velocity="20.0" />
     </joint>
 
 
@@ -116,7 +117,7 @@
         <parent link="base_link" />
         <child link="right_wheel_link" />
         <axis xyz="0.0 0.0 1" />
-        <limit lower="0.0" upper="0.0" effort="0.0" velocity="0.0" />
+        <limit effort="5.0" velocity="20.0" />
     </joint>
 </robot>
     
