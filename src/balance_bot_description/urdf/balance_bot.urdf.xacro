@@ -1,20 +1,25 @@
 <?xml version="1.0" encoding="utf-8"?>
 <robot xmlns:xacro="http://www.ros.org/wiki/xacro" name="mmtr">
 
-    <xacro:arg name="sim_mode" default="true"/>
+    <xacro:arg name="sim_mode" default="true" />
 
     <xacro:include filename="inertial_macros.xacro" />
     <xacro:include filename="$(find balance_bot_description)/urdf/balance_bot_control.urdf.xacro" />
-    
-    
-    <xacro:property name="wheel_mass" value="0.2" />
+    <xacro:include filename="$(find balance_bot_description)/urdf/balance_bot_gazebo.urdf.xacro"/>
+
     <xacro:property name="chassis_mass" value="0.5" />
-    <xacro:property name="wheel_length" value="0.01" />
-    <xacro:property name="wheel_radius" value="0.03" />
     <xacro:property name="chassis_length" value="0.03" />
     <xacro:property name="chassis_width" value="0.05" />
     <xacro:property name="chassis_height" value="0.1" />
 
+    <xacro:property name="wheel_mass" value="0.2" />
+    <xacro:property name="wheel_length" value="0.01" />
+    <xacro:property name="wheel_radius" value="0.03" />
+    
+    <xacro:property name="imu_mass" value="0.0022"/>
+    <xacro:property name="imu_height" value="0.0026"/>
+    <xacro:property name="imu_width" value="0.0254"/>
+    <xacro:property name="imu_length" value="0.0254"/>
 
     <material name="orange">
         <color rgba="1 0.3 0.1" />
@@ -28,6 +33,10 @@
         <color rgba="0 1 0" />
     </material>
 
+    <material name="yellow">
+        <color rgba="1 1 0"/>
+    </material>
+
     <link name="base_footprint" />
 
     <joint name="chassis_joint" type="fixed">
@@ -39,18 +48,20 @@
     <link name="base_link">
         <xacro:inertial_box mass="${chassis_mass}" x="${chassis_length}" y="${chassis_width}"
             z="${chassis_height}">
-            <origin xyz="${chassis_length/2} 0 ${chassis_height/2}" rpy="0 0 0"/>
+            <origin xyz="${chassis_length/2} 0 ${chassis_height/2}" rpy="0 0 0" />
         </xacro:inertial_box>
 
         <visual>
-            <origin xyz="${chassis_length/2} 0 ${chassis_height/2}"/>            <geometry>
+            <origin xyz="${chassis_length/2} 0 ${chassis_height/2}" />
+            <geometry>
                 <box size="${chassis_length} ${chassis_width} ${chassis_height}" />
             </geometry>
             <material name="orange" />
         </visual>
 
         <collision>
-            <origin xyz="${chassis_length/2} 0 ${chassis_height/2}"/>            <geometry>
+            <origin xyz="${chassis_length/2} 0 ${chassis_height/2}" />
+            <geometry>
                 <box size="${chassis_length} ${chassis_width} ${chassis_height}" />
             </geometry>
         </collision>
@@ -81,7 +92,7 @@
         </collision>
     </link>
 
-        <gazebo reference="right_wheel_link">
+    <gazebo reference="right_wheel_link">
         <material>Gazebo/Green</material>
     </gazebo>
 
@@ -104,9 +115,38 @@
             </geometry>
         </collision>
     </link>
+
     <gazebo reference="left_wheel_link">
         <material>Gazebo/Red</material>
     </gazebo>
+
+    <link name="imu_link">
+        <xacro:inertial_box mass="${imu_mass}" x="${imu_length}" y="${imu_width}"
+            z="${imu_height}">
+            <origin xyz="${chassis_length/2} 0 ${chassis_height/2}" />
+        </xacro:inertial_box>
+        <visual>
+            <origin xyz="${chassis_length/2} 0 0" />
+            <geometry>
+                <box size="${imu_length} ${imu_width} ${imu_height}" />
+            </geometry>
+        </visual>
+        <collision>
+            <origin xyz="${chassis_length/2} 0 0" />
+            <geometry>
+                <box size="${imu_length} ${imu_width} ${imu_height}" />
+            </geometry>
+        </collision>
+    </link>
+
+
+    <joint name="imu_joint" type="fixed">
+        <origin xyz="0.0 0.0 ${chassis_height}" rpy="0.0 0.0 0.0" />
+        <parent link="base_link" />
+        <child link="imu_link" />
+        <axis xyz="0.0 0.0 0.0" />
+    </joint>
+
     <joint name="left_wheel_joint" type="continuous">
         <origin xyz="${chassis_length/2} 0.031 0.0" rpy="${pi/2} 0.0 0.0" />
         <parent link="base_link" />
