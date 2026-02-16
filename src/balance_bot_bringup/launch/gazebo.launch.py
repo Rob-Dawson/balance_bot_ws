@@ -68,7 +68,7 @@ def generate_launch_description():
     world = LaunchConfiguration("world")
 
 
-    gazebo_params = {"gz_args": ["-r -v 4 ", world],"on_exit_shutdown":"true",}
+    gazebo_params = {"gz_args": ["-v 4 ", world],"on_exit_shutdown":"true",}
     gazebo = IncludeLaunchDescription(
         PythonLaunchDescriptionSource(
             gazebo_launch
