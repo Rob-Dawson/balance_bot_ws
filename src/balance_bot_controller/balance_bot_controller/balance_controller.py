@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-## TODO Add I and D params
+## TODO Add I
 ## Add State sensor protection in case messages are paused or removed etc
 ## Add anti windup
 
@@ -20,19 +20,21 @@ class BalanceController(Node):
         super().__init__("balance_controller")
 
         if IN_DEBUG:
-            self.balance_error_plotjuggler = self.create_publisher(Float64, "/balance_bot_controller/error", 10)
+            self.balance_error_plotjuggler = self.create_publisher(Float64, "DEBUG/balance_bot_controller/error", 10)
+            self.PID_param_plotjuggler = self.create_publisher(Float64MultiArray, "DEBUG/balance_bot_controller/PID", 10)
 
 
         self.imu_sub = self.create_subscription(Imu, "imu", self.imu_sub_cb, 10)
         self.balance = self.create_publisher(Float64MultiArray, "/balance_bot_controller/commands", 10)
 
         self.imu_pitch = None
+        self.imu_pitch_rate = None
+        self.setpoint = 0
         
         self.timer = self.create_timer(0.005, self.balance_cmd)
-        self.setpoint = 0
-        self.declare_parameter("Kp", 0.01)
+        self.declare_parameter("Kp", 0.1)
         self.declare_parameter("Ki", 0.0)
-        self.declare_parameter("Kd", 0.0)
+        self.declare_parameter("Kd", 0.05)
 
         self.Kp = self.get_parameter("Kp").get_parameter_value().double_value
         self.Ki = self.get_parameter("Ki").get_parameter_value().double_value
@@ -66,6 +68,7 @@ class BalanceController(Node):
                                                     imu_orientation.y,
                                                     imu_orientation.z,
                                                     imu_orientation.w,])
+        self.imu_pitch_rate = imu.angular_velocity.y
 
     def balance_cmd(self):
         control = Float64MultiArray()
@@ -74,13 +77,20 @@ class BalanceController(Node):
             
         else:
             error = self.setpoint - self.imu_pitch
-            control_input = self.Kp * error
+            p = self.Kp * error
+            d = -self.Kd * self.imu_pitch_rate
+            control_input = p+d
             control.data = [control_input,control_input]
 
             if IN_DEBUG:
                 balance_error = Float64()
                 balance_error.data = error
+
+                balance_pid = Float64MultiArray()
+                balance_pid.data = [p, d]
+
                 self.balance_error_plotjuggler.publish(balance_error)
+                self.PID_param_plotjuggler.publish(balance_pid)
         self.balance.publish(control)
 
 def main():
