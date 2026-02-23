@@ -18,6 +18,8 @@ DESTINATION share/${PROJECT_NAME})
 
 install (PROGRAMS
 ${PROJECT_NAME}/balance_controller.py
+${PROJECT_NAME}/velocity_controller.py
+
 DESTINATION lib/${PROJECT_NAME})
 
 if(BUILD_TESTING)
