@@ -23,7 +23,7 @@
         </noise>
     </xacro:macro>
 
-
+<!-- 
     <xacro:property name="imu_angular_mean" value="0.0" />
     <xacro:property name="imu_angular_stddev" value="0.0" />
     <xacro:property name="imu_angular_bias_mean" value="0.0" />
@@ -36,9 +36,9 @@
     <xacro:property name="imu_linear_bias_mean" value="0.0" />
     <xacro:property name="imu_linear_bias_stddev" value="0.0" />
     <xacro:property name="imu_linear_dynamic_bias_stddev" value="0.0" />
-    <xacro:property name="imu_linear_dynamic_bias_correlation_time" value="0.0" />
+    <xacro:property name="imu_linear_dynamic_bias_correlation_time" value="0.0" /> -->
 
-    <!-- <xacro:property name="imu_angular_mean" value="0.0" />
+    <xacro:property name="imu_angular_mean" value="0.0" />
     <xacro:property name="imu_angular_stddev" value="0.00262" />
     <xacro:property name="imu_angular_bias_mean" value="0.00" />
     <xacro:property name="imu_angular_bias_stddev" value="0.0087" />
@@ -50,12 +50,12 @@
     <xacro:property name="imu_linear_bias_mean" value="0.00" />
     <xacro:property name="imu_linear_bias_stddev" value="0.147" />
     <xacro:property name="imu_linear_dynamic_bias_stddev" value="2.0e-3" />
-    <xacro:property name="imu_linear_dynamic_bias_correlation_time" value="600" /> -->
+    <xacro:property name="imu_linear_dynamic_bias_correlation_time" value="600" />
 
     <gazebo reference="imu_link">
         <sensor name="imu" type="imu">
             <always_on>true</always_on>
-            <update_rate>100</update_rate>
+            <update_rate>500</update_rate>
             <gz_frame_id>imu_link</gz_frame_id>
             <topic>imu</topic>
 
