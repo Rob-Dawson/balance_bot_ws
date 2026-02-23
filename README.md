@@ -25,20 +25,33 @@ sudo apt install ros-jazzy-ros-gz ros-jazzy-ros-gz-sim
 
 ```bash
 # Clone this project
-git clone https://github.com/Rob-Dawson/balance_bot_ws
+$ git clone https://github.com/Rob-Dawson/balance_bot_ws
 
 # Access
-cd balance_bot_ws
+$ cd balance_bot_ws
 
 # Build the workspace
-colcon build
+$ colcon build
 
 # Source the workspace
-source install/setup.bash
+$ source install/setup.bash
 
 # Launch the robot
-ros2 launch balance_bot_bringup gazebo.launch.py
+$ ros2 launch balance_bot_bringup gazebo.launch.py
 ```
+
+## Useful Software for debugging
+```bash
+# PlotJuggler
+$ sudo apt install ros-jazzy-plotjuggler-ros
+```
+
+## Current Developments
+The first controller for the robot is a cascading control loop with inner loop using a PD controller and the outer loop being P (adding I in a later commit). The inner PD controller is responsible for ensuring the robot remains balanced and keeps close to the desired setpoint. A saturation detector is present and ensures max and min torque settings are observed.
+
+The outer control loop is responsible for deriving the desired setpoint by using a P controller with a velocity error derivied from the estimated velocity and the desired velocity (0 for still).
+
+I've added a number of debugging publishers which i'm viewing in PlotJuggler, however I do plan to make some timebased plots using matplotlib and upload them later.
 
 
 &#xa0;
