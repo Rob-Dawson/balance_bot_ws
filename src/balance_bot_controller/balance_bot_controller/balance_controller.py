@@ -39,11 +39,9 @@ class BalanceController(Node):
         self.timer = self.create_timer(0.005, self.balance_cmd)
         self.setpoint = 0
         self.declare_parameter("Kp", 0.1)
-        self.declare_parameter("Ki", 0.0)
         self.declare_parameter("Kd", 0.02)
 
         self.Kp = self.get_parameter("Kp").get_parameter_value().double_value
-        self.Ki = self.get_parameter("Ki").get_parameter_value().double_value
         self.Kd = self.get_parameter("Kd").get_parameter_value().double_value
 
         self.add_on_set_parameters_callback(self.event_callback)
@@ -55,7 +53,7 @@ class BalanceController(Node):
     def event_callback(self, parameter):
         result = SetParametersResult()
         for p in parameter:
-            if p.name in ("Kp", "Ki", "Kd"):
+            if p.name in ("Kp", "Kd"):
                 if p.value < 0.0:
                     self.get_logger().info(
                         f"Invalid parameter update: {p.name}: {p.value}")
@@ -65,8 +63,6 @@ class BalanceController(Node):
 
             if p.name == "Kp":
                 self.Kp = p.value
-            elif p.name == "Ki":
-                self.Ki = p.value
             elif p.name == "Kd":
                 self.Kd = p.value
         result.successful = True
