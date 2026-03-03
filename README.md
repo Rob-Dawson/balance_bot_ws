@@ -18,7 +18,10 @@ Before starting, you need to have [ROS2-Jazzy](https://docs.ros.org/en/jazzy/Ins
 ```bash
 # Install ros 2 control ros2 controllers and the gazebo bridge
 sudo apt install ros-jazzy-ros2-control ros-jazzy-ros2-controllers
-sudo apt install ros-jazzy-ros-gz ros-jazzy-ros-gz-sim
+sudo apt install ros-jazzy-ros-gz ros-jazzy-ros-gz-sim ros-jazzy-gz-ros2-control
+
+# Used for fusing gyro and accel values to provide an estimated orientation rather than using Gazebo's "perfect" orientation
+sudo apt install ros-jazzy-imu-filter-madgwick
 ```
 
 ## Starting
