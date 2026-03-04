@@ -24,8 +24,14 @@ class BalanceController(Node):
             self.balance_PID_plotjuggler = self.create_publisher(
                 Float64MultiArray, "/balance_bot_controller/PID", 10)
 
+        ## This is the angle at which motors will stop due to an irreperable fall
+        self.pitch_angle_fail = 0.5
         self.min_effort = -5
         self.max_effort = 5
+
+        ## This is used to detect if the IMU is stale (not working)
+        self.last_imu_time = None
+        self.timeout = 0.05
 
         self.imu_sub = self.create_subscription(
             Imu, "imu/data_raw", self.imu_sub_cb, 10)
@@ -48,14 +54,14 @@ class BalanceController(Node):
 
     def setpoint_cb(self, setpoint: Float64):
         self.setpoint = setpoint.data
-        self.get_logger().info(f"{self.setpoint}")
+        self.get_logger().debug(f"{self.setpoint}")
 
     def event_callback(self, parameter):
         result = SetParametersResult()
         for p in parameter:
             if p.name in ("Kp", "Kd"):
                 if p.value < 0.0:
-                    self.get_logger().info(
+                    self.get_logger().error(
                         f"Invalid parameter update: {p.name}: {p.value}")
                     result.successful = False
                     result.reason = "Invalid parameter update"
@@ -67,8 +73,9 @@ class BalanceController(Node):
                 self.Kd = p.value
         result.successful = True
         return result
-
+    
     def imu_sub_cb(self, imu: Imu):
+        self.last_imu_time = self.get_clock().now().nanoseconds * 1e-9
         imu_orientation = imu.orientation
         _, self.imu_pitch, _ = euler_from_quaternion([imu_orientation.x,
                                                       imu_orientation.y,
@@ -76,17 +83,20 @@ class BalanceController(Node):
                                                       imu_orientation.w,])
         self.imu_pitch_rate = imu.angular_velocity.y
 
+
+
     def balance_cmd(self):
+        current_time = self.get_clock().now().nanoseconds * 1e-9
         control = Float64MultiArray()
-        # print(self.imu_pitch)
-        # if self.imu_pitch is not None:
-        #     self.get_logger().info(f"pitch {self.imu_pitch}")
 
-        if self.imu_pitch is None or self.imu_pitch_rate is None:
+        if self.last_imu_time is None:
             control.data = [0, 0]
-        elif abs(self.imu_pitch) >= 1.4:
+        elif current_time - self.last_imu_time > self.timeout:
             control.data = [0, 0]
-
+        elif self.imu_pitch is None or self.imu_pitch_rate is None:
+            control.data = [0, 0]
+        elif abs(self.imu_pitch) >= self.pitch_angle_fail:
+            control.data = [0, 0]
         else:
             error = self.setpoint - self.imu_pitch
             Kp = self.Kp * error
@@ -95,11 +105,10 @@ class BalanceController(Node):
             control_input = Kp - Kd
             if control_input >= self.max_effort:
                 control_input = self.max_effort
-                self.get_logger().info("Saturated")
+                self.get_logger().debug("Saturated High")
             elif control_input <= self.min_effort:
                 control_input = self.min_effort
-                self.get_logger().info("Saturated")
-            # self.get_logger().info(f"Control Input = {control_input}")
+                self.get_logger().debug("Saturated Low")
 
             control.data = [control_input, control_input]
 
