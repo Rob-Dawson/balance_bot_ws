@@ -39,6 +39,7 @@ class VelocityController(Node):
         self.min_pitch = -0.15
         self.max_pitch = 0.15
 
+
         self.declare_parameter("Kv", 0.2)
         self.declare_parameter("Ki", 0.01)
         self.Kv = self.get_parameter("Kv").get_parameter_value().double_value
@@ -48,6 +49,7 @@ class VelocityController(Node):
             self.event_callback)
         
         self.last_time = None
+        self.integral_limit = self.max_pitch / max(self.Ki, 0.001)
 
     def event_callback(self, parameter):
         result = SetParametersResult()
@@ -62,9 +64,11 @@ class VelocityController(Node):
                 self.Kv = p.value
             elif p.name == "Ki":
                 self.Ki = p.value
+                self.integral_limit = self.max_pitch / max(self.Ki, 0.001)
 
-            result.successful = True
-            return result
+
+        result.successful = True
+        return result
 
     def joint_states_cb(self, joint_state: JointState):
         self.angular_wheel_L = joint_state.velocity[0]
@@ -77,11 +81,13 @@ class VelocityController(Node):
             pitch_setpoint = self.min_pitch
         return pitch_setpoint
 
-    def setpoint_cmd(self):
+    def setpoint_cmd(self):#
         current_time = self.get_clock().now().nanoseconds * 1e-9
         if self.last_time is None:
             self.last_time = current_time
-        dt = current_time - self.last_time
+        dt = current_time - self.last_time#
+        if dt == 0:
+            return
         setpoint_reference = Float64()
         # -Wheel radius due to the velocity being -ve when pitch is forward
         # This can be changed in the URDF
@@ -92,18 +98,25 @@ class VelocityController(Node):
 
         pitch_setpoint_raw = self.Kv * self.velocity_error + self.Ki * self.integral
 
-        pitch_setpoint = self.clamp(pitch_setpoint_raw)
-        
         ##Anti Windup
-        if 0 <= dt <= 0.01:
+        if 0 < dt < 0.01:
+            ## If saturated High
             if pitch_setpoint_raw > self.max_pitch and self.velocity_error < 0:
                 self.integral += self.velocity_error * dt
+            ## If saturated Low
             elif pitch_setpoint_raw < self.min_pitch and self.velocity_error > 0:
                 self.integral += self.velocity_error * dt
-            else:
+            elif self.min_pitch <= pitch_setpoint_raw <= self.max_pitch:
                 self.integral += self.velocity_error * dt
+        
+            ## Integral Clamp
+            if self.integral > self.integral_limit:
+                self.integral = self.integral_limit
+            elif self.integral < -self.integral_limit:
+                self.integral = -self.integral_limit
 
         pitch_setpoint = self.Kv * self.velocity_error + self.Ki * self.integral
+        pitch_setpoint = self.clamp(pitch_setpoint)
         
         setpoint_reference.data = pitch_setpoint
         self.setpoint_pub.publish(setpoint_reference)
