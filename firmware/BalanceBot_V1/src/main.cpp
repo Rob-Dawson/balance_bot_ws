@@ -1,18 +1,12 @@
 #include <Arduino.h>
-
-// put function declarations here:
-int myFunction(int, int);
+#include "IMUStateMachine.hpp"
+IMUStateMachine imu;
 
 void setup() {
-  // put your setup code here, to run once:
-  int result = myFunction(2, 3);
+  Serial.begin(9600);
+  imu.imuInit();
 }
 
 void loop() {
-  // put your main code here, to run repeatedly:
-}
-
-// put function definitions here:
-int myFunction(int x, int y) {
-  return x + y;
+  imu.update();
 }
