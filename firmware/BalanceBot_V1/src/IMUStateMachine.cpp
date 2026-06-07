@@ -1,5 +1,16 @@
 #include "IMUStateMachine.hpp"
 
+void IMUStateMachine::imuConversions()
+{
+    accel_x_ms2 = ax / 16384.0 * 9.80665;
+    accel_y_ms2 = ay / 16384.0 * 9.80665;
+    accel_z_ms2 = az / 16384.0 * 9.80665;
+    
+    gyro_x_rad = ((gx / 131.0f) * PI / 180.0f) - gyroBiasX;
+    gyro_y_rad = ((gy / 131.0f) * PI / 180.0f) - gyroBiasY;
+    gyro_z_rad = ((gz / 131.0f) * PI / 180.0f) - gyroBiasZ;
+}
+
 void IMUStateMachine::imuInit()
 {
     Wire.begin();
