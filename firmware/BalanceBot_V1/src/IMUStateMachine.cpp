@@ -1,4 +1,5 @@
 #include "IMUStateMachine.hpp"
+#define DEBUG_PRINTLN(x) Serial.println(x)
 
 void IMUStateMachine::imuConversions()
 {
@@ -9,6 +10,26 @@ void IMUStateMachine::imuConversions()
     gyro_x_rad = ((gx / 131.0f) * PI / 180.0f) - gyroBiasX;
     gyro_y_rad = ((gy / 131.0f) * PI / 180.0f) - gyroBiasY;
     gyro_z_rad = ((gz / 131.0f) * PI / 180.0f) - gyroBiasZ;
+}
+
+float IMUStateMachine::getPitch()
+{
+    return pitchEstimate - pitchOffset;
+}
+
+float IMUStateMachine::getPitchRate()
+{
+    return pitchRateEstimate;
+}
+
+float IMUStateMachine::getRawPitch()
+{
+    return pitchEstimate;
+}
+
+IMUState IMUStateMachine::getState()
+{
+    return state;
 }
 
 void IMUStateMachine::imuInit()
@@ -86,3 +107,4 @@ void IMUStateMachine::update()
             break;
     }
 }
+
