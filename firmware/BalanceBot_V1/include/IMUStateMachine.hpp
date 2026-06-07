@@ -19,15 +19,18 @@ public:
     
 private:
     IMUState state;
-    void imuConversions();
     void computeGyroBias();
     void computePitch();
+    void computeZeroOffset();
+    void imuConversions();
+
 
     float gyroBiasX;
     float gyroBiasY;
     float gyroBiasZ;
 
     float pitchEstimateSum = 0;
+    float pitchOffset = 0;
 
     float pitchEstimate;
     float pitchRateEstimate;
@@ -55,5 +58,7 @@ private:
 
     unsigned long startTime = 0;
     unsigned long previousDTTime = 0;
+    unsigned long startZeroTime = 0;
+
 };
 

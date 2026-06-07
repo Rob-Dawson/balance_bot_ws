@@ -51,18 +51,37 @@ void IMUStateMachine::computePitch()
     pitchEstimate = 0.98 * (pitchEstimate + pitchRateEstimate * dt) + (1.0 - 0.98) * pitch;
 }
 
+void IMUStateMachine::computeZeroOffset()
+{
+    if (startZeroTime == 0)
+    {
+        startZeroTime = millis();
+    }
+    pitchEstimateSum += pitchEstimate;
+    sampleCount++;
+    if (millis() - startZeroTime > 2000.0)
+    {
+        pitchOffset = pitchEstimateSum/sampleCount;
+        sampleCount = 0;
+        state = IMUState::RUNNING;
+    }
+}
 
 void IMUStateMachine::update()
 {
     imu.getMotion6(&ax, &ay, &az, &gx, &gy, &gz);
     imuConversions();
-
+    
     switch(state)
     {
         case IMUState::CALIBRATING_GYRO:
             computeGyroBias();
             break;
         case IMUState::CALIBRATING_ZERO:
+            computePitch();
+            computeZeroOffset();
+            break;
+        case IMUState::RUNNING:
             computePitch();
             break;
     }
