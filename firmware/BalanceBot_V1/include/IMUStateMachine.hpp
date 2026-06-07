@@ -19,9 +19,19 @@ public:
     
 private:
     IMUState state;
-
     void imuConversions();
     void computeGyroBias();
+    void computePitch();
+
+    float gyroBiasX;
+    float gyroBiasY;
+    float gyroBiasZ;
+
+    float pitchEstimateSum = 0;
+
+    float pitchEstimate;
+    float pitchRateEstimate;
+    
     MPU6050 imu;
     int16_t ax,ay,az;
     int16_t gx,gy,gz;
@@ -40,13 +50,10 @@ private:
     float gySum = 0.0;
     float gzSum = 0.0;
 
-    float gyroBiasX;
-    float gyroBiasY;
-    float gyroBiasZ;
+
     uint16_t sampleCount = 0;
 
     unsigned long startTime = 0;
-
-
+    unsigned long previousDTTime = 0;
 };
 

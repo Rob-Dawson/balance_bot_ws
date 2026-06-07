@@ -8,17 +8,6 @@ void IMUStateMachine::imuInit()
     state = IMUState::CALIBRATING_GYRO;
 }
 
-void IMUStateMachine::imuConversions()
-{
-    accel_x_ms2 = ax / 16384.0 * 9.80665;
-    accel_y_ms2 = ay / 16384.0 * 9.80665;
-    accel_z_ms2 = az / 16384.0 * 9.80665;
-    
-    gyro_x_rad = ((gx / 131.0f) * PI / 180.0f);
-    gyro_y_rad = ((gy / 131.0f) * PI / 180.0f);
-    gyro_z_rad = ((gz / 131.0f) * PI / 180.0f);
-}
-
 void IMUStateMachine::computeGyroBias()
 {
     gxSum += gyro_x_rad;
@@ -36,6 +25,22 @@ void IMUStateMachine::computeGyroBias()
     }
 }
 
+void IMUStateMachine::computePitch()
+{
+    if (previousDTTime == 0)
+    {
+        previousDTTime = micros();
+    }
+    unsigned long currentTime = micros();
+    
+    float dt = (currentTime - previousDTTime) / 1000000.0;
+    previousDTTime = currentTime;
+    float pitch = atan2(-accel_x_ms2,sqrt(accel_y_ms2*accel_y_ms2 + accel_z_ms2*accel_z_ms2));
+    pitchRateEstimate = gyro_y_rad;
+    pitchEstimate = 0.98 * (pitchEstimate + pitchRateEstimate * dt) + (1.0 - 0.98) * pitch;
+}
+
+
 void IMUStateMachine::update()
 {
     imu.getMotion6(&ax, &ay, &az, &gx, &gy, &gz);
@@ -45,6 +50,9 @@ void IMUStateMachine::update()
     {
         case IMUState::CALIBRATING_GYRO:
             computeGyroBias();
+            break;
+        case IMUState::CALIBRATING_ZERO:
+            computePitch();
             break;
     }
 }
