@@ -4,18 +4,20 @@ class MotorDriver
 {
 public:
     void init(); 
-    void setLeftPWM(int);
-    void setRightPWM(int);
+    void stop();
+    void setLeftPWM(int16_t);
+    void setRightPWM(int16_t);
 
 private:
+    int16_t clamp(int16_t);
 
-    int enA = 5;
-    int motor1_input1 = 6;
-    int motor1_input2 = 7;
+    const uint8_t enA = 5;
+    const uint8_t m_motor1_input1 = 6;
+    const uint8_t m_motor1_input2 = 7;
 
-    const int motor2_input1 = 4;
-    const int motor2_input2 = 10;
-    const int enB = 11;
+    const uint8_t m_motor2_input1 = 4;
+    const uint8_t m_motor2_input2 = 10;
+    const uint8_t enB = 11;
 
-
+    static constexpr int16_t m_MAX_PWM = 255;
 };

@@ -1,49 +1,76 @@
 #include "MotorDriver.hpp"
 #include <Arduino.h>
 
-
-
-
 void MotorDriver::init()
 {
     pinMode(enA, OUTPUT);
     pinMode(enB, OUTPUT);
-    pinMode(motor1_input1, OUTPUT);
-    pinMode(motor1_input2, OUTPUT);
-    pinMode(motor2_input1, OUTPUT);
-    pinMode(motor2_input2, OUTPUT);
+    pinMode(m_motor1_input1, OUTPUT);
+    pinMode(m_motor1_input2, OUTPUT);
+    pinMode(m_motor2_input1, OUTPUT);
+    pinMode(m_motor2_input2, OUTPUT);
 }
 
-void MotorDriver::setLeftPWM(int pwm)
+int16_t MotorDriver::clamp(int16_t pwm)
 {
+    if (pwm > m_MAX_PWM)
+    {
+        return m_MAX_PWM;
+    }
+    else if(pwm < -m_MAX_PWM)
+    {
+        return -m_MAX_PWM;
+    }
+    return pwm;
+}
+
+void MotorDriver::setLeftPWM(int16_t pwm)
+{
+    pwm = clamp(pwm);
     //Forwards
+
     if (pwm > 0)
     {
-        digitalWrite(motor1_input1, HIGH);
-        digitalWrite(motor1_input2, LOW);
+        digitalWrite(m_motor1_input1, LOW);
+        digitalWrite(m_motor1_input2, HIGH);
+
     }
     else if (pwm < 0)
     {
-        digitalWrite(motor1_input1, LOW);
-        digitalWrite(motor1_input2, HIGH);
+        digitalWrite(m_motor1_input1, HIGH);
+        digitalWrite(m_motor1_input2, LOW);
     }
     analogWrite(enA, abs(pwm));
 }
 
-void MotorDriver::setRightPWM(int pwm)
+void MotorDriver::setRightPWM(int16_t pwm)
 {
+    pwm = clamp(pwm);
     //Forwards
     if (pwm > 0)
     {
-        digitalWrite(motor2_input1, HIGH);
-        digitalWrite(motor2_input2, LOW);
+        digitalWrite(m_motor2_input1, HIGH);
+        digitalWrite(m_motor2_input2, LOW);
     }
     
     //Backwards
     else if (pwm < 0)
     {
-        digitalWrite(motor2_input1, LOW);
-        digitalWrite(motor2_input2, HIGH);
+        digitalWrite(m_motor2_input1, LOW);
+        digitalWrite(m_motor2_input2, HIGH);
     }
+    
     analogWrite(enB, abs(pwm));
+}
+
+void MotorDriver::stop()
+{
+    digitalWrite(m_motor1_input1, LOW);
+    digitalWrite(m_motor1_input2, LOW);
+
+    digitalWrite(m_motor2_input1, LOW);
+    digitalWrite(m_motor2_input2, LOW);
+
+    analogWrite(enA, 0);
+    analogWrite(enB, 0);
 }
