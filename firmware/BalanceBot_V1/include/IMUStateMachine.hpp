@@ -4,6 +4,7 @@
 
 enum class IMUState
 {
+    INIT,
     CALIBRATING_GYRO, 
     CALIBRATING_ZERO,
     RUNNING,
@@ -24,7 +25,7 @@ class IMUStateMachine
 
     private:
 
-    IMUState state;
+    IMUState state = IMUState::INIT;
     void computeGyroBias();
     void computePitch();
     void computeZeroOffset();
