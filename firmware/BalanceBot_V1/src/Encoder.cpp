@@ -99,7 +99,7 @@ float Encoder::getSpeedRight()
     float countsPerSecond = m_micro2Sec/elapsed;
     float wheelRadPerSec = countsPerSecond * (2*PI / m_countsPerRev);
     
-    wheelRadPerSec * Encoder::getRightDirection();
+    wheelRadPerSec = wheelRadPerSec * Encoder::getRightDirection();
     return wheelRadPerSec;
 }
 
