@@ -5,8 +5,8 @@ class MotorDriver
 public:
     void init(); 
     void stop();
-    void setLeftPWM(int16_t);
-    void setRightPWM(int16_t);
+    void setLeftPWM(float controlInput);
+    void setRightPWM(float controlInput);
 
 private:
     int16_t clamp(int16_t);
@@ -20,4 +20,5 @@ private:
     const uint8_t enB = 11;
 
     static constexpr int16_t m_MAX_PWM = 255;
+    static constexpr int8_t m_deadband = 40;
 };
