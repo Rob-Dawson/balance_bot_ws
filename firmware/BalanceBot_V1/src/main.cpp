@@ -2,7 +2,7 @@
 #include "IMUStateMachine.hpp"
 #include "Encoder.hpp"
 #include "MotorDriver.hpp"
-
+#include "BalanceController.hpp"
 const char* stateToString(IMUState state)
 {
     switch (state)
@@ -23,7 +23,8 @@ IMUState previousState = imu.getState();
 
 Encoder encoder;
 MotorDriver motor;
-
+BalanceController controller;
+float controlOutput = 0.0f;
 void setup() {
   Serial.begin(9600);
   imu.imuInit();
@@ -45,14 +46,8 @@ void loop() {
     previousState = state;
   }
   if (state != IMUState::RUNNING) return; 
-
-  motor.setRightPWM(0);
-  motor.setLeftPWM(0);
-
-  Serial.print("Left Wheel Speed: ");
-  Serial.print(encoder.getSpeedLeft(),2);
-
-  Serial.print("\t\t\tRight Wheel Speed: ");
-  Serial.println(encoder.getSpeedRight(),2);
+  controlOutput = controller.update(imu.getPitch(), imu.getPitchRate());
+  motor.setLeftPWM(controlOutput);
+  motor.setRightPWM(controlOutput);
 
 }
