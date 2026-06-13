@@ -12,22 +12,22 @@ void IMUStateMachine::imuConversions()
     gyro_z_rad = ((gz / 131.0f) * PI / 180.0f) - gyroBiasZ;
 }
 
-float IMUStateMachine::getPitch()
+float IMUStateMachine::getPitch() const
 {
     return pitchEstimate - pitchOffset;
 }
 
-float IMUStateMachine::getPitchRate()
+float IMUStateMachine::getPitchRate() const
 {
     return pitchRateEstimate;
 }
 
-float IMUStateMachine::getRawPitch()
+float IMUStateMachine::getRawPitch() const
 {
     return pitchEstimate;
 }
 
-IMUState IMUStateMachine::getState()
+IMUState IMUStateMachine::getState() const
 {
     return state;
 }
@@ -92,7 +92,6 @@ void IMUStateMachine::update()
 {
     imu.getMotion6(&ax, &ay, &az, &gx, &gy, &gz);
     imuConversions();
-    
     switch(state)
     {
         case IMUState::CALIBRATING_GYRO:
@@ -106,5 +105,6 @@ void IMUStateMachine::update()
             computePitch();
             break;
     }
+
 }
 

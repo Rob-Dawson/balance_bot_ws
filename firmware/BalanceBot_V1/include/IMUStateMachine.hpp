@@ -12,18 +12,18 @@ enum class IMUState
 
 class IMUStateMachine
 {
-    public:
+public:
     
     void update();
     void imuInit();
-    IMUState getState();
-    float getPitch();
-    float getPitchRate();
-    float getRawPitch();
+    IMUState getState() const;
+    float getPitch() const;
+    float getPitchRate() const;
+    float getRawPitch() const;
 
 
 
-    private:
+private:
 
     IMUState state = IMUState::INIT;
     void computeGyroBias();
@@ -35,8 +35,8 @@ class IMUStateMachine
     float gyroBiasY;
     float gyroBiasZ;
 
-    float pitchOffset = 0;
-    float pitchEstimateSum = 0;
+    float pitchOffset{};
+    float pitchEstimateSum{};
 
     float pitchEstimate;
     float pitchRateEstimate;
@@ -44,24 +44,24 @@ class IMUStateMachine
     
     
     MPU6050 imu;
-    int16_t ax,ay,az;
-    int16_t gx,gy,gz;
+    int16_t ax,ay,az{};
+    int16_t gx,gy,gz{};
 
-    float accel_x_ms2 = 0.0;
-    float accel_y_ms2 = 0.0;
-    float accel_z_ms2 = 0.0;
+    float accel_x_ms2{};
+    float accel_y_ms2{};
+    float accel_z_ms2{};
 
-    float gyro_x_rad = 0.0;
-    float gyro_y_rad = 0.0;
-    float gyro_z_rad = 0.0;
+    float gyro_x_rad{};
+    float gyro_y_rad{};
+    float gyro_z_rad{};
 
-    float gxSum = 0.0;
-    float gySum = 0.0;
-    float gzSum = 0.0;
-    uint16_t sampleCount = 0;
+    float gxSum{};
+    float gySum{};
+    float gzSum{};
+    uint16_t sampleCount;
 
-    unsigned long startTime = 0;
-    unsigned long previousDTTime = 0;
-    unsigned long startZeroTime = 0;
+    unsigned long startTime{};
+    unsigned long previousDTTime{};
+    unsigned long startZeroTime{};
 
 };
