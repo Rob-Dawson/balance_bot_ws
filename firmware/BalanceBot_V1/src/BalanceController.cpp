@@ -1,20 +1,16 @@
 #include "BalanceController.hpp"
 
-BalanceController::BalanceController()
-{
-    m_pitchController.setOutputLimits(-m_maxEffort, m_maxEffort);
-    m_pitchController.setPID(5.5,0.9,1.0);
+BalanceController::BalanceController() {
+  m_pitchController.setOutputLimits(-255, 255);
+  m_pitchController.setPD(1000.0, 150.0);
 }
 
-    float BalanceController::update(float pitch, float pitchRate)
-{
-    m_error = m_targetPitch - pitch;
-    Serial.print("ERROR: ");
-    Serial.print(m_error);
+void BalanceController::setKp(float Kp) { m_pitchController.setP(Kp); }
 
-    float controlOutput = m_pitchController.updatePD(m_error, pitchRate);
-    Serial.print("\t\tControl OUTPUT:  ");
-    Serial.println(controlOutput);
+void BalanceController::setKd(float Kd) { m_pitchController.setD(Kd); }
 
-    return controlOutput;
+float BalanceController::update(float pitch, float pitchRate) {
+  m_error = m_targetPitch - pitch;
+  float controlOutput = m_pitchController.updatePD(m_error, pitchRate);
+  return controlOutput;
 }
