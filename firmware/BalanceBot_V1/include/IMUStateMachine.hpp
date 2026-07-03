@@ -1,67 +1,58 @@
-#include "I2Cdev.h"
 #include "MPU6050.h"
 #include <Arduino.h>
 
-enum class IMUState
-{
-    INIT,
-    CALIBRATING_GYRO, 
-    CALIBRATING_ZERO,
-    RUNNING,
+enum class IMUState {
+  INIT,
+  CALIBRATING_GYRO,
+  CALIBRATING_ZERO,
+  RUNNING,
 };
 
-class IMUStateMachine
-{
+class IMUStateMachine {
 public:
-    
-    void update();
-    void imuInit();
-    IMUState getState() const;
-    float getPitch() const;
-    float getPitchRate() const;
-    float getRawPitch() const;
-
-
+  void update();
+  void imuInit();
+  IMUState getState() const { return m_state; };
+  float getPitch() const { return m_pitchEstimate - m_pitchOffset; };
+  float getPitchRate() const { return m_pitchRateEstimate; };
+  float getRawPitch() const { return m_pitchEstimate; };
 
 private:
+  IMUState m_state = IMUState::INIT;
+  void computeGyroBias();
+  void computePitch();
+  void computeZeroOffset();
+  void imuConversions();
 
-    IMUState state = IMUState::INIT;
-    void computeGyroBias();
-    void computePitch();
-    void computeZeroOffset();
-    void imuConversions();
+  float m_gyroBiasX{};
+  float m_gyroBiasY{};
+  float m_gyroBiasZ{};
 
-    float gyroBiasX;
-    float gyroBiasY;
-    float gyroBiasZ;
+  float m_pitchOffset{};
+  float m_pitchEstimateSum{};
 
-    float pitchOffset{};
-    float pitchEstimateSum{};
+  bool m_pitchInit = false;
+  float m_pitchEstimate{};
+  float m_pitchRateEstimate{};
 
-    float pitchEstimate;
-    float pitchRateEstimate;
+  MPU6050 m_imu;
+  int16_t m_ax{}, m_ay{}, m_az{};
+  int16_t m_gx{}, m_gy{}, m_gz{};
 
-    
-    
-    MPU6050 imu;
-    int16_t ax,ay,az{};
-    int16_t gx,gy,gz{};
+  float m_accelXMs2{};
+  float m_accelYMs2{};
+  float m_accelZMs2{};
 
-    float accel_x_ms2{};
-    float accel_y_ms2{};
-    float accel_z_ms2{};
+  float m_gyroXRad{};
+  float m_gyroYRad{};
+  float m_gyroZRad{};
 
-    float gyro_x_rad{};
-    float gyro_y_rad{};
-    float gyro_z_rad{};
+  float m_gxSum{};
+  float m_gySum{};
+  float m_gzSum{};
+  uint16_t m_sampleCount{};
 
-    float gxSum{};
-    float gySum{};
-    float gzSum{};
-    uint16_t sampleCount;
-
-    unsigned long startTime{};
-    unsigned long previousDTTime{};
-    unsigned long startZeroTime{};
-
+  unsigned long m_startTime{};
+  unsigned long m_previousDTTime{};
+  unsigned long m_startZeroTime{};
 };
