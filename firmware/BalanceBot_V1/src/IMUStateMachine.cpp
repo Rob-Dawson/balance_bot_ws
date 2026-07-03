@@ -1,110 +1,90 @@
 #include "IMUStateMachine.hpp"
 #define DEBUG_PRINTLN(x) Serial.println(x)
 
-void IMUStateMachine::imuConversions()
-{
-    accel_x_ms2 = ax / 16384.0 * 9.80665;
-    accel_y_ms2 = ay / 16384.0 * 9.80665;
-    accel_z_ms2 = az / 16384.0 * 9.80665;
-    
-    gyro_x_rad = ((gx / 131.0f) * PI / 180.0f) - gyroBiasX;
-    gyro_y_rad = ((gy / 131.0f) * PI / 180.0f) - gyroBiasY;
-    gyro_z_rad = ((gz / 131.0f) * PI / 180.0f) - gyroBiasZ;
+void IMUStateMachine::imuConversions() {
+  m_accelXMs2 = m_ax / 16384.0 * 9.80665;
+  m_accelYMs2 = m_ay / 16384.0 * 9.80665;
+  m_accelZMs2 = m_az / 16384.0 * 9.80665;
+
+  m_gyroXRad = ((m_gx / 131.0f) * PI / 180.0f) - m_gyroBiasX;
+  m_gyroYRad = ((m_gy / 131.0f) * PI / 180.0f) - m_gyroBiasY;
+  m_gyroZRad = ((m_gz / 131.0f) * PI / 180.0f) - m_gyroBiasZ;
 }
 
-float IMUStateMachine::getPitch() const
-{
-    return pitchEstimate - pitchOffset;
+void IMUStateMachine::imuInit() {
+  Wire.begin();
+  m_imu.initialize();
+  m_startTime = millis();
+  m_state = IMUState::CALIBRATING_GYRO;
+  Serial.println(m_imu.testConnection() ? "MPU6050 connection successful"
+                                        : "MPU6050 connection failed");
 }
 
-float IMUStateMachine::getPitchRate() const
-{
-    return pitchRateEstimate;
+void IMUStateMachine::computeGyroBias() {
+  m_gxSum += m_gyroXRad;
+  m_gySum += m_gyroYRad;
+  m_gzSum += m_gyroZRad;
+  m_sampleCount++;
+
+  if (millis() - m_startTime > 2000.0) {
+    m_gyroBiasX = m_gxSum / m_sampleCount;
+    m_gyroBiasY = m_gySum / m_sampleCount;
+    m_gyroBiasZ = m_gzSum / m_sampleCount;
+    m_sampleCount = 0;
+    m_state = IMUState::CALIBRATING_ZERO;
+  }
 }
 
-float IMUStateMachine::getRawPitch() const
-{
-    return pitchEstimate;
+void IMUStateMachine::computePitch() {
+  if (m_previousDTTime == 0) {
+    m_previousDTTime = micros();
+  }
+
+  unsigned long currentTime = micros();
+  float dt = (currentTime - m_previousDTTime) / 1000000.0;
+  m_previousDTTime = currentTime;
+
+  float pitchAngle = atan2(
+      m_accelXMs2, sqrt(m_accelYMs2 * m_accelYMs2 + m_accelZMs2 * m_accelZMs2));
+  if (!m_pitchInit) {
+    m_pitchEstimate = pitchAngle;
+    m_pitchInit = true;
+  }
+
+  m_pitchRateEstimate = m_gyroYRad;
+  m_pitchEstimate = 0.98f * (m_pitchEstimate + m_pitchRateEstimate * dt) +
+                    (1.0 - 0.98f) * pitchAngle;
 }
 
-IMUState IMUStateMachine::getState() const
-{
-    return state;
+void IMUStateMachine::computeZeroOffset() {
+  if (m_startZeroTime == 0) {
+    m_startZeroTime = millis();
+  }
+  m_pitchEstimateSum += m_pitchEstimate;
+  m_sampleCount++;
+  if (millis() - m_startZeroTime > 2000.0) {
+    m_pitchOffset = m_pitchEstimateSum / m_sampleCount;
+    m_sampleCount = 0;
+    m_state = IMUState::RUNNING;
+  }
 }
 
-void IMUStateMachine::imuInit()
-{
-    Wire.begin();
-    imu.initialize();
-    startTime = millis();
-    state = IMUState::CALIBRATING_GYRO;
+void IMUStateMachine::update() {
+  m_imu.getMotion6(&m_ax, &m_ay, &m_az, &m_gx, &m_gy, &m_gz);
+  imuConversions();
+
+  switch (m_state) {
+  case IMUState::INIT:
+    break;
+  case IMUState::CALIBRATING_GYRO:
+    computeGyroBias();
+    break;
+  case IMUState::CALIBRATING_ZERO:
+    computePitch();
+    computeZeroOffset();
+    break;
+  case IMUState::RUNNING:
+    computePitch();
+    break;
+  }
 }
-
-void IMUStateMachine::computeGyroBias()
-{
-    gxSum += gyro_x_rad;
-    gySum += gyro_y_rad;
-    gzSum += gyro_z_rad;
-    sampleCount++;
-
-    if (millis() - startTime > 2000.0)
-    {
-        gyroBiasX = gxSum / sampleCount;
-        gyroBiasY = gySum / sampleCount;
-        gyroBiasZ = gzSum / sampleCount;
-        sampleCount = 0;
-        state = IMUState::CALIBRATING_ZERO;
-    }
-}
-
-void IMUStateMachine::computePitch()
-{
-    if (previousDTTime == 0)
-    {
-        previousDTTime = micros();
-    }
-    unsigned long currentTime = micros();
-    
-    float dt = (currentTime - previousDTTime) / 1000000.0;
-    previousDTTime = currentTime;
-    float pitch = atan2(-accel_x_ms2,sqrt(accel_y_ms2*accel_y_ms2 + accel_z_ms2*accel_z_ms2));
-    pitchRateEstimate = gyro_y_rad;
-    pitchEstimate = 0.98 * (pitchEstimate + pitchRateEstimate * dt) + (1.0 - 0.98) * pitch;
-}
-
-void IMUStateMachine::computeZeroOffset()
-{
-    if (startZeroTime == 0)
-    {
-        startZeroTime = millis();
-    }
-    pitchEstimateSum += pitchEstimate;
-    sampleCount++;
-    if (millis() - startZeroTime > 2000.0)
-    {
-        pitchOffset = pitchEstimateSum/sampleCount;
-        sampleCount = 0;
-        state = IMUState::RUNNING;
-    }
-}
-
-void IMUStateMachine::update()
-{
-    imu.getMotion6(&ax, &ay, &az, &gx, &gy, &gz);
-    imuConversions();
-    switch(state)
-    {
-        case IMUState::CALIBRATING_GYRO:
-            computeGyroBias();
-            break;
-        case IMUState::CALIBRATING_ZERO:
-            computePitch();
-            computeZeroOffset();
-            break;
-        case IMUState::RUNNING:
-            computePitch();
-            break;
-    }
-
-}
-
