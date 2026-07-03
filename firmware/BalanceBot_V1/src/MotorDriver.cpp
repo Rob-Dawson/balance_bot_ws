@@ -1,95 +1,89 @@
 #include "MotorDriver.hpp"
 #include <Arduino.h>
 
-void MotorDriver::init()
-{
-    pinMode(enA, OUTPUT);
-    pinMode(enB, OUTPUT);
-    pinMode(m_motor1_input1, OUTPUT);
-    pinMode(m_motor1_input2, OUTPUT);
-    pinMode(m_motor2_input1, OUTPUT);
-    pinMode(m_motor2_input2, OUTPUT);
+void MotorDriver::init() {
+  pinMode(enA, OUTPUT);
+  pinMode(enB, OUTPUT);
+  pinMode(m_motor1_input1, OUTPUT);
+  pinMode(m_motor1_input2, OUTPUT);
+  pinMode(m_motor2_input1, OUTPUT);
+  pinMode(m_motor2_input2, OUTPUT);
 }
 
-int16_t MotorDriver::clamp(int16_t pwm)
-{
-    if (pwm > m_MAX_PWM)
-    {
-        return m_MAX_PWM;
-    }
-    else if(pwm < -m_MAX_PWM)
-    {
-        return -m_MAX_PWM;
-    }
-    return pwm;
+int16_t MotorDriver::clamp(int16_t pwm) {
+  if (pwm > m_MAX_PWM) {
+    return m_MAX_PWM;
+  } else if (pwm < -m_MAX_PWM) {
+    return -m_MAX_PWM;
+  }
+  return pwm;
 }
 
-void MotorDriver::setLeftPWM(float controlInput)
-{
-    float pwmFloat = controlInput * 51;
+void MotorDriver::setDeadband(int deadband) { m_deadbandRight = deadband; }
 
-    int16_t pwmInt = round(pwmFloat);
-    pwmInt = clamp(pwmInt);
-    Serial.print("\t\t\tPWM: ");
-    Serial.println(pwmInt);
+void MotorDriver::setLeftPWM(int pwm) { m_requestedPWMLeft = pwm; }
 
-    //Forwards
+void MotorDriver::setRightPWM(int pwm) { m_requestedPWMRight = pwm; }
 
-    if (pwmInt > 0)
-    {
-        digitalWrite(m_motor1_input1, LOW);
-        digitalWrite(m_motor1_input2, HIGH);
-        pwmInt = pwmInt + m_deadband;
-    }
-    else if (pwmInt < 0)
-    {
-        digitalWrite(m_motor1_input1, HIGH);
-        digitalWrite(m_motor1_input2, LOW);
-        pwmInt = pwmInt - m_deadband;
+void MotorDriver::setRightEffort(float controlInput) {
 
-    }
-    pwmInt = clamp(pwmInt);
-    
-    analogWrite(enA, abs(pwmInt));
+  m_requestedPWMRight = clamp((int16_t)round(controlInput));
 }
 
-void MotorDriver::setRightPWM(float controlInput)
-{
-    float pwmFloat = controlInput * 51;
-    int16_t pwmInt = round(pwmFloat);
-    pwmInt = clamp(pwmInt);
-    Serial.print("\t\t\tPWM: ");
-    Serial.println(pwmInt);
-    
-    //Forwards
-    if (pwmInt > 0)
-    {
-        digitalWrite(m_motor2_input1, HIGH);
-        digitalWrite(m_motor2_input2, LOW);
-        pwmInt = pwmInt + m_deadband;
-
-    }
-    
-    //Backwards
-    else if (pwmInt < 0)
-    {
-        digitalWrite(m_motor2_input1, LOW);
-        digitalWrite(m_motor2_input2, HIGH);
-        pwmInt = pwmInt - m_deadband;
-    }
-    pwmInt = clamp(pwmInt);
-    
-    analogWrite(enB, abs(pwmInt));
+void MotorDriver::setLeftEffort(float controlInput) {
+  m_requestedPWMLeft = clamp((int16_t)round(controlInput));
 }
 
-void MotorDriver::stop()
-{
-    digitalWrite(m_motor1_input1, LOW);
+void MotorDriver::moveRight() {
+  int mapPWM = abs(m_requestedPWMRight);
+
+  if (mapPWM == 0) {
+    stopRight();
+    return;
+  }
+
+  if (m_requestedPWMRight > 0) {
+    digitalWrite(m_motor1_input1, HIGH);
     digitalWrite(m_motor1_input2, LOW);
+    m_appliedPWMRight = map(mapPWM, 1, 255, m_deadbandRight, 255);
+  } else {
+    digitalWrite(m_motor1_input1, LOW);
+    digitalWrite(m_motor1_input2, HIGH);
+    m_appliedPWMRight = -map(mapPWM, 1, 255, m_deadbandRight, 255);
+  }
+  analogWrite(enA, abs(m_appliedPWMRight));
+}
 
-    digitalWrite(m_motor2_input1, LOW);
+void MotorDriver::moveLeft() {
+  int pwmMag = abs(m_requestedPWMLeft);
+
+  if (pwmMag == 0) {
+    stopLeft();
+    return;
+  }
+  if (m_requestedPWMLeft > 0) {
+    digitalWrite(m_motor2_input1, HIGH);
     digitalWrite(m_motor2_input2, LOW);
+    m_appliedPWMLeft = map(pwmMag, 1, 255, m_deadbandLeft, 255);
+  }
 
-    analogWrite(enA, 0);
-    analogWrite(enB, 0);
+  else if (m_requestedPWMLeft < 0) {
+    digitalWrite(m_motor2_input1, LOW);
+    digitalWrite(m_motor2_input2, HIGH);
+    m_appliedPWMLeft = -map(pwmMag, 1, 255, m_deadbandLeft, 255);
+  }
+  analogWrite(enB, abs(m_appliedPWMLeft));
+}
+
+void MotorDriver::stopLeft() {
+  m_appliedPWMLeft = 0;
+  digitalWrite(m_motor1_input1, LOW);
+  digitalWrite(m_motor1_input2, LOW);
+  analogWrite(enA, m_appliedPWMLeft);
+}
+void MotorDriver::stopRight() {
+  m_appliedPWMRight = 0;
+  digitalWrite(m_motor2_input1, LOW);
+  digitalWrite(m_motor2_input2, LOW);
+  analogWrite(enB, m_appliedPWMRight);
 }
