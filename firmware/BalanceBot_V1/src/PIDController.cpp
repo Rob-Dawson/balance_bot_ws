@@ -1,34 +1,28 @@
 #include <PIDController.hpp>
 
-void PIDController::setOutputLimits(int8_t minOutput, int8_t maxOutput)
-{
-    m_minOutput = minOutput;
-    m_maxOutput = maxOutput;
+void PIDController::setOutputLimits(int16_t minOutput, int16_t maxOutput) {
+  m_minOutput = minOutput;
+  m_maxOutput = maxOutput;
 }
-void PIDController::setPID(int Kp, int Ki, int Kd)
-{
-    m_Kp = Kp;
-    m_Kd = Ki;
-    m_Ki = Kd;
+void PIDController::setPD(float Kp, float Kd) {
+  m_Kp = Kp;
+  m_Kd = Kd;
 }
 
-OutputLimits PIDController::getMinMaxOutput() const
-{
-    return {m_minOutput, m_maxOutput};
+float PIDController::updatePD(float error, float measuredRate) {
+  m_outputKp = m_Kp * error;
+  m_outputKd = m_Kd * measuredRate;
+
+  m_controlOutput = m_outputKp - m_outputKd;
+  m_controlOutput = m_controlOutputRaw;
+  if (m_controlOutput >= m_maxOutput)
+    m_controlOutput = m_maxOutput;
+
+  else if (m_controlOutput <= m_minOutput)
+    m_controlOutput = m_minOutput;
+
+  return m_controlOutput;
 }
 
-float PIDController::updatePD(float error, float measuredRate)
-{
-    m_outputKp = m_Kp * error;
-    m_outputKd = m_Kd * measuredRate;
-
-    m_controlOutput = m_outputKp - m_outputKd;
-
-    if (m_controlOutput >= m_maxOutput)
-        m_controlOutput = m_maxOutput;
-
-    else if (m_controlOutput <= m_minOutput)
-        m_controlOutput = m_minOutput;
-
-    return m_controlOutput;
-}
+void PIDController::setP(float Kp) { m_Kp = Kp; }
+void PIDController::setD(float Kd) { m_Kd = Kd; }
