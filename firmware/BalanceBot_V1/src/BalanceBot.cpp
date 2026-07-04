@@ -16,13 +16,13 @@ const char *stateToString(IMUState state) {
 void BalanceBot::telemetryState() {
     telemetry.rawPitch = convertToDeg(imu.getRawPitch());
 
-    telemetry.pitchError = convertToDeg(controller.getError());
-    telemetry.targetPitch = convertToDeg(controller.getTargetPitch());
+    telemetry.pitchError = convertToDeg(pitchController.getError());
+    telemetry.targetPitch = convertToDeg(pitchController.getTargetPitch());
     telemetry.pitchEstimate = convertToDeg(imu.getPitch());
     telemetry.pitchRateEstimate = convertToDeg(imu.getPitchRate());
 
-    telemetry.outputKp = controller.getOutputKp();
-    telemetry.outputKd = controller.getOutputKd();
+    telemetry.outputKp = pitchController.getOutputKp();
+    telemetry.outputKd = pitchController.getOutputKd();
     telemetry.commandOutput = controlOutput;
     telemetry.requestedPWMLeft = motor.getRequestedPWMLeft();
     telemetry.requestedPWMRight = motor.getRequestedPWMRight();
@@ -78,9 +78,6 @@ void BalanceBot::init() {
 
 void BalanceBot::onEnterState(IMUState state) {
     Serial.println(stateToString(state));
-    Serial.print(stateToString(state));
-    Serial.print(",");
-    Serial.print("\n");
 }
 
 void BalanceBot::handleSerial() {
@@ -90,10 +87,10 @@ void BalanceBot::handleSerial() {
     char cmd = Serial.read();
     if (cmd == 'p') {
         float value = Serial.parseFloat();
-        controller.setKp(value);
+        pitchController.setKp(value);
     } else if (cmd == 'd') {
         float value = Serial.parseFloat();
-        controller.setKd(value);
+        pitchController.setKd(value);
     }
 }
 
@@ -112,6 +109,7 @@ void BalanceBot::openLoop(int motorA, int motorB) {
 }
 
 void BalanceBot::update() {
+
     handleSerial();
     imu.update();
     IMUState state = imu.getState();
@@ -122,12 +120,19 @@ void BalanceBot::update() {
     if (state != IMUState::RUNNING) {
         return;
     }
-    controlOutput = controller.update(imu.getPitch(), imu.getPitchRate());
+    uint32_t dt = micros() - m_lastUpdateTime;
+    dtElapsed = dt * microToSeconds;
+    float pitchSetpoint = velocityController.update(
+        encoder.getSpeedLeft(), encoder.getSpeedRight(), m_wheelRad,
+        m_desiredSpeed, dt);
+    controlOutput = pitchController.update(pitchSetpoint, imu.getPitch(),
+                                           imu.getPitchRate());
     closedLoop(controlOutput, controlOutput);
 
-    if (millis() - lastPrintTime >= 5) {
+    if (millis() - lastPrintTime >= 50) {
         telemetryState();
         telemetryPrint();
         lastPrintTime = millis();
     }
+    m_lastUpdateTime = micros();
 }
