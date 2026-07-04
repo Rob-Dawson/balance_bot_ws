@@ -7,6 +7,7 @@ public:
     float update(float pitchSetpoint, float pitch, float pitchRate);
 
     float getError() const { return m_error; };
+    float getTargetPitch() const { return m_targetPitch; };
 
     float getOutputKp() const { return m_pitchController.getKp(); };
     float getOutputKd() const { return m_pitchController.getKd(); };
@@ -18,6 +19,7 @@ public:
 
 private:
     float m_error{};
+    float m_targetPitch{0.0};
     int16_t m_maxEffort{255};
 
     PIDController m_pitchController{};
