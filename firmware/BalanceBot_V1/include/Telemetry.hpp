@@ -1,5 +1,6 @@
 #pragma once
-#include "Arduino.h"
+#include <stdint.h> //Uncomment if using AVR-GCC: 7.3.0 and older
+// #include <cstdint>  //Uncomment if using ARM
 struct Telemetry {
     float rawPitch;
     float pitchError;

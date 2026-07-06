@@ -1,3 +1,5 @@
+#pragma once
+
 #include "Encoder.hpp"
 #include "IMUStateMachine.hpp"
 #include "MotorDriver.hpp"
@@ -5,6 +7,7 @@
 #include "Telemetry.hpp"
 #include "VelocityController.hpp"
 #include <Arduino.h>
+#include <stdint.h>
 
 class BalanceBot {
 public:
@@ -18,10 +21,8 @@ private:
     void handleSerial();
     void telemetryPrint();
     void telemetryState();
-    inline float convertToDeg(float rad) { return rad * 180 / PI; }
-    void onEnterState(IMUState state);
 
-    static const char *stateToString(IMUState state);
+    void onEnterState(IMUState state);
 
     IMUStateMachine imu;
     IMUState previousState{imu.getState()};
@@ -38,8 +39,8 @@ private:
     uint32_t m_lastUpdateTime{0};
     bool initPrint{true};
 
-    static constexpr float microToSeconds{0.000001f};
     float dtElapsed{0.0f};
-    static constexpr float m_wheelRad{0.35};
     float m_desiredSpeed{0.0};
+    const float m_wheelRad{0.35};
+    const uint8_t printTimeThreshold{50};
 };

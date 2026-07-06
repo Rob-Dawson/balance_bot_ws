@@ -1,5 +1,9 @@
 #include "BalanceBot.hpp"
+namespace {
+constexpr float microToSeconds{0.000001f};
+constexpr float RadToDeg{180.0F / float(PI)};
 
+float convertToDeg(float rad) { return rad * RadToDeg; };
 const char *stateToString(IMUState state) {
     switch (state) {
     case IMUState::CALIBRATING_GYRO:
@@ -12,10 +16,10 @@ const char *stateToString(IMUState state) {
         return "UNKNOWN";
     }
 }
+} // namespace
 
 void BalanceBot::telemetryState() {
     telemetry.rawPitch = convertToDeg(imu.getRawPitch());
-
     telemetry.pitchError = convertToDeg(pitchController.getError());
     telemetry.targetPitch = convertToDeg(pitchController.getTargetPitch());
     telemetry.pitchEstimate = convertToDeg(imu.getPitch());
@@ -81,10 +85,11 @@ void BalanceBot::onEnterState(IMUState state) {
 }
 
 void BalanceBot::handleSerial() {
-    if (!Serial.available())
+    if (Serial.available() == 0) {
         return;
+    }
 
-    char cmd = Serial.read();
+    int cmd = Serial.read();
     if (cmd == 'p') {
         float value = Serial.parseFloat();
         pitchController.setKp(value);
@@ -121,15 +126,15 @@ void BalanceBot::update() {
         return;
     }
     uint32_t dt = micros() - m_lastUpdateTime;
-    dtElapsed = dt * microToSeconds;
+    dtElapsed = static_cast<float>(dt) * microToSeconds;
     float pitchSetpoint = velocityController.update(
         encoder.getSpeedLeft(), encoder.getSpeedRight(), m_wheelRad,
-        m_desiredSpeed, dt);
+        m_desiredSpeed, dtElapsed);
     controlOutput = pitchController.update(pitchSetpoint, imu.getPitch(),
                                            imu.getPitchRate());
     closedLoop(controlOutput, controlOutput);
 
-    if (millis() - lastPrintTime >= 50) {
+    if (millis() - lastPrintTime >= printTimeThreshold) {
         telemetryState();
         telemetryPrint();
         lastPrintTime = millis();

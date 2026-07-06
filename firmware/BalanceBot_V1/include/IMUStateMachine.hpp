@@ -1,3 +1,5 @@
+#pragma once
+
 #include "MPU6050.h"
 #include <Arduino.h>
 
@@ -35,7 +37,7 @@ private:
     float m_pitchEstimate{};
     float m_pitchRateEstimate{};
 
-    MPU6050 m_imu{};
+    MPU6050 m_imu;
     int16_t m_ax{}, m_ay{}, m_az{};
     int16_t m_gx{}, m_gy{}, m_gz{};
 
@@ -50,6 +52,7 @@ private:
     float m_gxSum{};
     float m_gySum{};
     float m_gzSum{};
+    const float m_alpha{0.98F};
     uint16_t m_sampleCount{};
 
     unsigned long m_startTime{};

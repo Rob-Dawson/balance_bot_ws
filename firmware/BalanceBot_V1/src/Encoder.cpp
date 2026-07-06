@@ -21,8 +21,8 @@ static void leftEncoderEvent() {
 
     // This function will fire at
     // 00 11 00
-    int8_t encoderA = digitalRead(lhEncoderA);
-    int8_t encoderB = digitalRead(lhEncoderB);
+    uint8_t encoderA = digitalRead(lhEncoderA);
+    uint8_t encoderB = digitalRead(lhEncoderB);
 
     if (encoderA != encoderB) {
         leftDirection = -1;
@@ -40,8 +40,8 @@ static void rightEncoderEvent() {
     elapsedTimeRight = currentTime - lastRhTime;
     lastRhTime = currentTime;
 
-    int8_t encoderA = digitalRead(rhEncoderA);
-    int8_t encoderB = digitalRead(rhEncoderB);
+    uint8_t encoderA = digitalRead(rhEncoderA);
+    uint8_t encoderB = digitalRead(rhEncoderB);
 
     if (encoderA != encoderB) {
         rightDirection = -1;
@@ -59,13 +59,16 @@ float Encoder::getSpeedLeft() {
     lastTime = lastLhTime;
     interrupts();
 
-    if (micros() - lastTime > m_timeout)
+    if (micros() - lastTime > m_timeout) {
         return 0.0f;
-    if (elapsed == 0)
+    }
+    if (elapsed == 0) {
         return 0.0f;
+    }
 
-    float countsPerSecond = m_micro2Sec / elapsed;
-    float wheelRadPerSec = countsPerSecond * (2 * PI / m_countsPerRev);
+    float countsPerSecond = m_micro2Sec / static_cast<float>(elapsed);
+    float wheelRadPerSec =
+        countsPerSecond * (2 * static_cast<float>(PI) / m_countsPerRev);
     wheelRadPerSec = wheelRadPerSec * Encoder::getLeftDirection();
     return wheelRadPerSec;
 }
@@ -73,19 +76,22 @@ float Encoder::getSpeedLeft() {
 float Encoder::getSpeedRight() {
     uint32_t elapsed;
     uint32_t lastTime;
-    int8_t direction;
 
     noInterrupts();
     elapsed = elapsedTimeRight;
     lastTime = lastRhTime;
     interrupts();
 
-    if (micros() - lastTime > m_timeout)
+    if (micros() - lastTime > m_timeout) {
         return 0.0f;
-    if (elapsed == 0)
+    }
+    if (elapsed == 0) {
         return 0.0f;
-    float countsPerSecond = m_micro2Sec / elapsed;
-    float wheelRadPerSec = countsPerSecond * (2 * PI / m_countsPerRev);
+    }
+
+    float countsPerSecond = m_micro2Sec / static_cast<float>(elapsed);
+    float wheelRadPerSec =
+        countsPerSecond * (2 * static_cast<float>(PI) / m_countsPerRev);
 
     wheelRadPerSec = wheelRadPerSec * Encoder::getRightDirection();
     return wheelRadPerSec;

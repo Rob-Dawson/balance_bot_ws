@@ -1,4 +1,4 @@
-#include "Encoder.hpp"
+#pragma once
 #include "PIDController.hpp"
 class VelocityController {
 public:
@@ -12,8 +12,14 @@ private:
     float m_velocityError{};
     float m_desiredVelocity{};
     float m_controllerOutput{};
+    // Left as non const for online tuning and adapting
 
-    PIDController m_velocityController{};
+    // NOLINTBEGIN(readability-magic-numbers)
+    float Kp{10.0};
+    float Ki{0.8};
+    // NOLINTEND(readability-magic-numbers)
+
+    PIDController m_velocityController;
 
     static constexpr float m_maxPitch{0.349066f};
 };

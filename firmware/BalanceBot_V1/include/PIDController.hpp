@@ -1,8 +1,8 @@
-#include "Arduino.h"
+#pragma once
 
 struct OutputLimits {
-    int16_t minOutput;
-    int16_t maxOutput;
+    float minOutput;
+    float maxOutput;
 };
 
 class PIDController {
@@ -18,7 +18,7 @@ public:
     void setI(float Ki);
     void setD(float Kd);
 
-    void setOutputLimits(int16_t maxRate, int16_t minRate);
+    void setOutputLimits(float minOutput, float maxOutput);
     OutputLimits getMinMaxOutput() const { return {m_minOutput, m_maxOutput}; };
 
     float getKp() const { return m_outputKp; };
@@ -41,6 +41,7 @@ private:
     float m_controlOutput{};
     float m_controlOutputRaw{};
 
-    int16_t m_maxOutput{};
-    int16_t m_minOutput{};
+    float m_maxOutput{};
+    float m_minOutput{};
+    const float MaxIntegrationDt{0.01F};
 };
