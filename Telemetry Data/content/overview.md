@@ -1,0 +1,1 @@
+This dashboard visualises telemetry recorded from the Balance Bot. Recorded experiments can be explored to analyse sensor measurements, control outputs and system behaviour, helping to compare hardware configurations and control algorithms.
