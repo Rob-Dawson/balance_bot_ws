@@ -1,18 +1,21 @@
-
+# Python
 **/.venv/
+__pycache__/
 .cache/
 
-
+# ROS 2
 build/
 install/
 log/
 *.log
 
-
+# PlatformIO
 .pio/
 .pioenvs/
 .piolibdeps/
-.compile_commands.json
 
+# Generated files
+**/compile_commands.json
 
+# VS Code
 .vscode/

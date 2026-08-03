@@ -26,19 +26,16 @@ BalanceBot currently provides two independent development workflows.
 
 ### ROS 2 Simulation
 
-Develop, test and evaluate balancing controllers within a simulated environment using ROS 2 and Gazebo Harmonic.
+Develop, test and evaluate balancing controllers within a simulated environment using ROS 2 Jazzy and Gazebo Harmonic.
 
-See:
+**[Simulation Guide](simulation/README.md)**
 
-> **simulation/README.md**
 
-### Arduino Firmware
+### Firmware
 
-Deploy the balancing controller to physical hardware using the Arduino platform.
+Deploy the balancing controller to the physical robot using PlatformIO and the Arduino framework.
 
-See:
-
-> **firmware/arduino/README.md**
+**[Firmware Guide](firmware/README.md)**
 
 Native ESP-IDF support is currently under development.
 
