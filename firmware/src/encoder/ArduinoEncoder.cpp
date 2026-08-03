@@ -1,4 +1,4 @@
-#include "encoder/EncoderArduino.hpp"
+#include "encoder/ArduinoEncoder.hpp"
 #include "common/config.hpp"
 #include <Arduino.h>
 
@@ -104,10 +104,6 @@ float ArduinoEncoder::getSpeedRight() {
 
     return EncoderMath::calculateWheelSpeed(elapsed, direction);
 }
-
-Direction ArduinoEncoder::getLeftDirection() { return leftDirection; }
-
-Direction ArduinoEncoder::getRightDirection() { return rightDirection; }
 
 bool ArduinoEncoder::init() {
     pinMode(lhEncoderA, INPUT);

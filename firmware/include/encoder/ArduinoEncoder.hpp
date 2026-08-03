@@ -8,6 +8,9 @@ public:
     bool init() override;
     float getSpeedRight() override;
     float getSpeedLeft() override;
+    // Direction ArduinoEncoder::getLeftDirection() { return leftDirection; }
+
+    // Direction ArduinoEncoder::getRightDirection() { return rightDirection; }
 
 private:
 };
