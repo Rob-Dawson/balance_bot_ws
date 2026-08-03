@@ -28,7 +28,7 @@ BalanceBot currently provides two independent development workflows.
 
 Develop, test and evaluate balancing controllers within a simulated environment using ROS 2 Jazzy and Gazebo Harmonic.
 
-**[Simulation Guide](simulation/README.md)**
+**[Simulation Guide](simulation/balance_bot_ws/src/README.md)**
 
 
 ### Firmware
