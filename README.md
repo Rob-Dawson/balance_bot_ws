@@ -12,21 +12,11 @@ BalanceBot is a project which began as a ROS 2 and Gazebo simulation and has gra
 
 ## Technologies
 
-### Firmware
-- C++
-- Arduino
-- ESP-IDF *(planned)*
-
-### Simulation
-
-- ROS 2 Jazzy
-- Gazebo Harmonic
-
-### Analysis
-
-- Python
-- PlotJuggler
-- Streamlit
+| Firmware | Simulation | Analysis |
+| --- | --- | --- |
+| C++ | ROS 2 Jazzy | Python |
+| Arduino | Gazebo Harmonic | PlotJuggler |
+| ESP-IDF *(planned)* | | Streamlit |
 
 ---
 
