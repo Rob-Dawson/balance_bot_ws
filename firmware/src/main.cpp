@@ -1,5 +1,5 @@
 #include "balance/BalanceBot.hpp"
-#include "encoder/Encoder.hpp"
+#include "encoder/ArduinoEncoder.hpp"
 #include "imu/IMUStateMachine.hpp"
 #include <Arduino.h>
 

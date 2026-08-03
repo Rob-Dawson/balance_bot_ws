@@ -1,4 +1,5 @@
 #include "balance/BalanceBot.hpp"
+#include "encoder/IEncoder.hpp"
 #include "imu/IMUState.hpp"
 #include "telemetry/Telemetry.hpp"
 
@@ -22,7 +23,7 @@ const char *stateToString(IMUState state) {
 }
 } // namespace
 
-BalanceBot::BalanceBot(IIMU &imu, ArduinoEncoder *encoder, Telemetry *telemetry)
+BalanceBot::BalanceBot(IIMU &imu, IEncoder *encoder, Telemetry *telemetry)
     : imu(imu), encoder(encoder), telemetry(telemetry) {}
 
 void BalanceBot::telemetryState() {

@@ -2,7 +2,7 @@
 #include "controller/PitchController.hpp"
 #include "controller/VelocityController.hpp"
 
-#include "encoder/Encoder.hpp"
+#include "encoder/IEncoder.hpp"
 #include "imu/IIMU.hpp"
 #include "motor/MotorDriver.hpp"
 #include "telemetry/Telemetry.hpp"
@@ -55,7 +55,7 @@ public:
         }
     }
 
-    BalanceBot(IIMU &imu, ArduinoEncoder *encoder = nullptr,
+    BalanceBot(IIMU &imu, IEncoder *encoder = nullptr,
                Telemetry *telemetry = nullptr);
 
 private:
@@ -91,7 +91,7 @@ private:
     IIMU &imu;
     IMUState previousState{imu.getState()};
 
-    ArduinoEncoder *encoder;
+    IEncoder *encoder;
     Telemetry *telemetry;
     MotorDriver motor;
     PitchController pitchController;
