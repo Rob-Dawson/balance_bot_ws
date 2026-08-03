@@ -9,5 +9,7 @@ Checks: >
   -modernize-use-nodiscard
 
 WarningsAsErrors: ""
-HeaderFilterRegex: ".*"
+HeaderFilterRegex: '.*/firmware/(src|include)/.*'
+ExcludeHeaderFilterRegex: '.*/(\.pio|\.platformio)/.*'
+SystemHeaders: false
 FormatStyle: file

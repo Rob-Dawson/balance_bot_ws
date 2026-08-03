@@ -29,15 +29,19 @@ jobs:
       - name: Check out repository
         uses: actions/checkout@v4
 
-      - name: Install clang-format
-        run: sudo apt-get update && sudo apt-get install -y clang-format
+      - name: Install clang-format 21
+        run: |
+          wget https://apt.llvm.org/llvm.sh
+          chmod +x llvm.sh
+          sudo ./llvm.sh 21
+          sudo apt-get install -y clang-format-21
 
       - name: Check C++ formatting
         run: |
           find firmware/src firmware/include firmware/test \
             \( -name "*.cpp" -o -name "*.hpp" \) \
             -print0 |
-          xargs -0 clang-format \
+          xargs -0 clang-format-21 \
             --dry-run \
             --Werror \
             --style=file

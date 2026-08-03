@@ -24,7 +24,8 @@ jobs:
         working-directory: firmware
 
     steps:
-      - uses: actions/checkout@v4
+      - name: Check out repository
+        uses: actions/checkout@v4
 
       - name: Set up Python
         uses: actions/setup-python@v5
@@ -34,14 +35,18 @@ jobs:
       - name: Install PlatformIO
         run: pip install platformio
 
-      - name: Install clang-tidy
-        run: sudo apt-get update && sudo apt-get install -y clang-tidy
+      - name: Install clang-tidy 21
+        working-directory: .
+        run: |
+          wget https://apt.llvm.org/llvm.sh
+          chmod +x llvm.sh
+          sudo ./llvm.sh 21
+          sudo apt-get install -y clang-tidy-21
 
       - name: Generate compile database
         run: pio run -t compiledb
 
       - name: Run clang-tidy
-        working-directory: firmware
         run: |
           find src -name "*.cpp" -print0 |
-          xargs -0 -n1 clang-tidy -p .
+          xargs -0 -n1 clang-tidy-21 -p .
