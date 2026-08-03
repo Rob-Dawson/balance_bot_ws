@@ -1,0 +1,47 @@
+name: C++ Static Analysis
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - "firmware/**"
+      - ".github/workflows/clang-tidy.yml"
+
+  push:
+    branches: [main]
+    paths:
+      - "firmware/**"
+      - ".github/workflows/clang-tidy.yml"
+
+  workflow_dispatch:
+
+jobs:
+  tidy:
+    runs-on: ubuntu-latest
+
+    defaults:
+      run:
+        working-directory: firmware
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.x"
+
+      - name: Install PlatformIO
+        run: pip install platformio
+
+      - name: Install clang-tidy
+        run: sudo apt-get update && sudo apt-get install -y clang-tidy
+
+      - name: Generate compile database
+        run: pio run -t compiledb
+
+      - name: Run clang-tidy
+        working-directory: firmware
+        run: |
+          find src -name "*.cpp" -print0 |
+          xargs -0 -n1 clang-tidy -p .
