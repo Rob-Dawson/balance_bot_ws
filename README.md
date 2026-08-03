@@ -1,60 +1,91 @@
-<h1 align="center">Balance_bot</h1>
+<h1 align="center">BalanceBot</h1>
+<h3>Cross-platform self-balancing robot exploring embedded firmware,
+robotics software architecture and modern control systems.</h3>
+
+---
 
 ## About
 
-The project features a ROS2 and Gazebo Harmonic balancing robot which is being continuously updated. The purpose is to explore different control algorithms and investigate how they perform and the differences between them.
- 
+BalanceBot is a project which began as a ROS 2 and Gazebo simulation and has gradually evolved into a physical self-balancing robot. The project investigates how different control architectures such as Cascading PID, LQR and MPC perform while developing portable embedded firmware that can be reused across simulation and multiple hardware platforms.
+
+---
+
 ## Technologies
 
-The following tools were used in this project:
+### Firmware
+- C++
+- Arduino
+- ESP-IDF *(planned)*
 
-- ROS2 - Jazzy
-- Python
+### Simulation
+
+- ROS 2 Jazzy
 - Gazebo Harmonic
 
-## Requirements
+### Analysis
 
-Before starting, you need to have [ROS2-Jazzy](https://docs.ros.org/en/jazzy/Installation.html) and [Gazebo Harmonic](https://gazebosim.org/docs/latest/ros_installation/) installed. I tend to install ros2 using the desktop-full for a smooth experience. Once ROS2 Jazzy is installed, you then need ros2_control and the Gazebo to ros2_control bridge
-```bash
-# Install ros 2 control ros2 controllers and the gazebo bridge
-sudo apt install ros-jazzy-ros2-control ros-jazzy-ros2-controllers
-sudo apt install ros-jazzy-ros-gz ros-jazzy-ros-gz-sim ros-jazzy-gz-ros2-control
+- Python
+- PlotJuggler
+- Streamlit
 
-# Used for fusing gyro and accel values to provide an estimated orientation rather than using Gazebo's "perfect" orientation
-sudo apt install ros-jazzy-imu-filter-madgwick
-```
+---
 
-## Starting
+## Getting Started
 
-```bash
-# Clone this project
-$ git clone https://github.com/Rob-Dawson/balance_bot_ws
+BalanceBot currently provides two independent development workflows.
 
-# Access
-$ cd balance_bot_ws
+### ROS 2 Simulation
 
-# Build the workspace
-$ colcon build
+Develop, test and evaluate balancing controllers within a simulated environment using ROS 2 and Gazebo Harmonic.
 
-# Source the workspace
-$ source install/setup.bash
+See:
 
-# Launch the robot
-$ ros2 launch balance_bot_bringup gazebo.launch.py
-```
+> **simulation/README.md**
 
-## Useful Software for debugging
-```bash
-# PlotJuggler
-$ sudo apt install ros-jazzy-plotjuggler-ros
-```
+### Arduino Firmware
 
-## Current Developments
-The first controller for the robot is a cascading control loop with inner loop using a PD controller and the outer loop being P (adding I in a later commit). The inner PD controller is responsible for ensuring the robot remains balanced and keeps close to the desired setpoint. A saturation detector is present and ensures max and min torque settings are observed.
+Deploy the balancing controller to physical hardware using the Arduino platform.
 
-The outer control loop is responsible for deriving the desired setpoint by using a P controller with a velocity error derivied from the estimated velocity and the desired velocity (0 for still).
+See:
 
-I've added a number of debugging publishers which i'm viewing in PlotJuggler, however I do plan to make some timebased plots using matplotlib and upload them later.
+> **firmware/arduino/README.md**
+
+Native ESP-IDF support is currently under development.
+
+---
+
+## Hardware
+
+### Current Hardware
+
+- Arduino UNO
+- MPU6050 IMU
+- L298N Motor Driver
+- 12 V 300 RPM Brushed DC Motors with Integrated Encoders
+
+### Planned Hardware
+
+- ESP32-C5
+- TB6612FNG Motor Driver
+
+---
+
+## Current Development
+
+Current work focuses on improving the firmware architecture through hardware abstraction, allowing the same control logic to be reused across simulation and embedded platforms.
+
+Development is also underway on an offline telemetry dashboard for analysing controller behaviour and comparing control algorithms.
+
+Future work includes native ESP-IDF support, wireless telemetry and the evaluation of additional control architectures.
+
+---
+## Credits
+
+The original mechanical design is based on:
+
+- *(https://makerworld.com/en/models/691734-fall-e-the-self-balancing-robot?from=search#profileId-620442)*
+
+---
 
 
 &#xa0;
